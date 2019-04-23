@@ -22,7 +22,7 @@ a little more opaque.  This one processes in about 1 second.
 from PIL import Image
 from picamera import PiCamera
 from shutil import copy2 as filecopy
-from os import rename
+from os import rename, path, mkdir
 from time import sleep, time
 from numpy import asarray, int_, sign
 from numpy import sum as npsum
@@ -30,7 +30,7 @@ from numpy import sum as npsum
 # Global constants
 THRESHOLD = 30 # Cut-off for determining 'empty' pixels.
 BIRD_SIZE = 25000 # Number of different pixels needed to save image.
-DELAY = 0 # Time between photos.  Doesn't include processing time.
+DELAY = 0 # Time in seconds between photos.  Doesn't include processing time.  Can be 0.
 
 def get_pic(filename):
     """
@@ -56,12 +56,25 @@ def count_pixels(rgb_diff):
     count = npsum(sign(diffs//THRESHOLD))
     return count
 
+def get_img_path():
+    m = 1
+    while path.isdir(path.expanduser("~/critters{}".format((str(m).zfill(4))))):
+        m += 1
+    img_path = path.expanduser("~/critters{}/".format((str(m).zfill(4))))
+    mkdir(img_path)
+    return img_path 
+
 # Main code
 camera = PiCamera()
 n = 1 # Image number to be appended to image filename.
+# expanduser expands the ~ shortcut to the home directory.
+img_path = get_img_path()
+
 try:
     # Start camera and get initial image.
     camera.start_preview()
+    # Allow camera to adjust to light.
+    sleep(2)
     camera.capture('image1.jpg')
     array1 = get_pic('image1.jpg')
     while True:
@@ -77,8 +90,8 @@ try:
         diff = abs(array2-array1)
 
         # If a bird was found, save image and increment image number.
-        if count_pixels(diff) > BIRD_SIZE::
-            filecopy('image2.jpg', 'bird{}.jpg'.format((str(n).zfill(4))))
+        if count_pixels(diff) > BIRD_SIZE:
+            filecopy('image2.jpg', img_path + 'critter{}.jpg'.format((str(n).zfill(4))))
             n += 1 
 
         # Transfer image2 to image1 to prepare for the next comparison:
