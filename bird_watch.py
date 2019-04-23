@@ -26,6 +26,7 @@ from os import rename, path, mkdir
 from time import sleep, time
 from numpy import asarray, int_, sign
 from numpy import sum as npsum
+from sys import stdout
 
 # Global constants
 THRESHOLD = 30 # Cut-off for determining 'empty' pixels.
@@ -65,6 +66,7 @@ def get_img_path():
     return img_path 
 
 # Main code
+stdout = open('log.txt','w')
 camera = PiCamera()
 n = 1 # Image number to be appended to image filename.
 # expanduser expands the ~ shortcut to the home directory.
