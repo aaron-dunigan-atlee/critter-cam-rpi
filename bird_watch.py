@@ -26,11 +26,12 @@ from os import rename, path, mkdir
 from time import sleep, time
 from numpy import asarray, int_, sign
 from numpy import sum as npsum
-from sys import stdout
 
 # Global constants
 THRESHOLD = 30 # Cut-off for determining 'empty' pixels.
-BIRD_SIZE = 25000 # Number of different pixels needed to save image.
+BIRD_SIZE = 5000 # Number of different pixels needed to save image.
+# 25000 registers trucks and busses from house window, but doesn't register cards or people.  Took about 400 photos in 8 hours.
+
 DELAY = 0 # Time in seconds between photos.  Doesn't include processing time.  Can be 0.
 
 def get_pic(filename):
@@ -66,7 +67,6 @@ def get_img_path():
     return img_path 
 
 # Main code
-stdout = open('log.txt','w')
 camera = PiCamera()
 n = 1 # Image number to be appended to image filename.
 # expanduser expands the ~ shortcut to the home directory.
