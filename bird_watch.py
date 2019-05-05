@@ -30,6 +30,7 @@ from numpy import sum as npsum
 # Global constants
 THRESHOLD = 30 # Cut-off for determining 'empty' pixels.
 BIRD_SIZE = 5000 # Number of different pixels needed to save image.
+TEMPFILE1, TEMPFILE2 = 'image1.jpg', 'image2.jpg' # Filenames for image files.
 # 25000 registers trucks and busses from house window, but doesn't register cards or people.  Took about 400 photos in 8 hours.
 
 DELAY = 0 # Time in seconds between photos.  Doesn't include processing time.  Can be 0.
@@ -58,56 +59,80 @@ def count_pixels(rgb_diff):
     count = npsum(sign(diffs//THRESHOLD))
     return count
 
+
+def calculate_file_diffs(file1, file2):
+    """ Get arrays of rgb values for two files and subtract them. """
+
+    array1 = get_pic(file1)
+    array2 = get_pic(file2)
+    
+    # Subtract rgb values (numpy arrays make this easy; standard arrays
+    # don't allow for pairwise subtraction and iterating abs() over the
+    # result like this).
+
+    return abs(array2-array1)
+
+def calculate_diffs(array1, array2):
+    """ Get arrays of rgb values for two files and subtract them. """
+
+    # Subtract rgb values (numpy arrays make this easy; standard arrays
+    # don't allow for pairwise subtraction and iterating abs() over the
+    # result like this).
+
+    return abs(array2-array1)
+
 def get_img_path():
     m = 1
+    # expanduser expands the ~ shortcut to the user's home directory.
     while path.isdir(path.expanduser("~/critters{}".format((str(m).zfill(4))))):
         m += 1
     img_path = path.expanduser("~/critters{}/".format((str(m).zfill(4))))
     mkdir(img_path)
     return img_path 
 
-# Main code
-camera = PiCamera()
-n = 1 # Image number to be appended to image filename.
-# expanduser expands the ~ shortcut to the home directory.
-img_path = get_img_path()
+def main():
+    # Main code
+    camera = PiCamera()
+    n = 1 # Image number to be appended to image filename.
+    img_path = get_img_path()
 
-try:
-    # Start camera and get initial image.
-    camera.start_preview()
-    # Allow camera to adjust to light.
-    sleep(2)
-    camera.capture('image1.jpg')
-    array1 = get_pic('image1.jpg')
-    while True:
-        # start = time() # Used for measuring processing time.
+    try:
+        # Start camera and get initial image.
+        camera.start_preview()
+        # Make preview transparent so we can still do other stuff.
+        camera.preview.alpha = 0
+        # Allow camera to adjust to light.
+        sleep(2)
+        camera.capture(TEMPFILE1)
+        array1 = get_pic(TEMPFILE1)
+        while True:
+            # start = time() # Used for measuring processing time.
 
-        # Get second image for comparison:
-        camera.capture('image2.jpg')
-        array2 = get_pic('image2.jpg')
+            # Get second image for comparison:
+            camera.capture(TEMPFILE2)
+            array2 = get_pic(TEMPFILE2)
 
-        # Subtract rgb values (numpy arrays make this easy; standard arrays
-        # don't allow for pairwise subtraction and iterating abs() over the
-        # result like this):
-        diff = abs(array2-array1)
+            # If a bird was found, save image and increment image number.
+            diff = calculate_diffs(array1, array2)
+            if count_pixels(diff) > BIRD_SIZE:
+                filecopy(TEMPFILE2, img_path + 'critter{}.jpg'.format((str(n).zfill(4))))
+                n += 1 
 
-        # If a bird was found, save image and increment image number.
-        if count_pixels(diff) > BIRD_SIZE:
-            filecopy('image2.jpg', img_path + 'critter{}.jpg'.format((str(n).zfill(4))))
-            n += 1 
+            # Transfer image2 to image1 to prepare for the next comparison:
+            rename(TEMPFILE2, TEMPFILE1)
+            array1 = array2
 
-        # Transfer image2 to image1 to prepare for the next comparison:
-        rename('image2.jpg', 'image1.jpg')
-        array1 = array2
+            # print(time()-start) # Print processing time.
 
-        # print(time()-start) # Print processing time.
+            # Pause before taking next photo:
+            sleep(DELAY)
+    except KeyboardInterrupt:
+        # Use CTRL + C to stop photographing.
+        print('Canceled.')
+    finally:
+        # Camera preview is full screen, so we need to shut it off
+        # before exiting:
+        camera.stop_preview()
 
-        # Pause before taking next photo:
-        sleep(DELAY)
-except KeyboardInterrupt:
-    # Use CTRL + C to stop photographing.
-    print('Canceled.')
-finally:
-    # Camera preview is full screen, so we need to shut it off
-    # before exiting:
-    camera.stop_preview()
+if __name__ == '__main__':
+    main()
