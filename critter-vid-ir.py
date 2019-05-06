@@ -1,27 +1,9 @@
 """
-critter-cam-ir.py by Aaron Dunigan AtLee
-Updated May 2019
+critter-vid-ir.py by Aaron Dunigan AtLee
+May 2019
 
-This script adapts the original bird-watch.py for use with a Kuman night-vision IR camera.
-The Kuman IR lamps tend to flicker, triggering the script to notice a "change" and record 
-almost every frame.  Therefore, we add a filter that notices when most pixels are
-changing in the same "direction."
-
-Using a Raspberry Pi with camera module, we wanted to catch birds on camera
-at our bird feeder.  We fixed the camera in place, then ran this program
-which takes photos at a regular interval (approx 1 second).
-It compares two consecutive photos and subtracts the R,G,B values of their
-pixels.  If the R,G,and/or B have changed
-by a significant amount (THRESHOLD), we consider the pixel to have changed.
-If enough pixels (greater than CRITTER_SIZE) have changed, we assume that
-an object has entered the scene (i.e. a bird, although we also caught people
-and cars passing by).  If an object is detected, the second photo is kept;
-otherwise it is discarded.
-
-The original comparison algorithm is in birds.py.  That algorithm did the
-subtraction 'by hand' and ran slowly (20 seconds to process); this version
-uses the math module 'numpy' to speed things up, though this makes the math
-a little more opaque.  This one processes in about 1.4 seconds.
+Similar to critter-cam-ir, but this one records video
+when it detects a critter in view.
 """
 
 # Imports
@@ -38,8 +20,9 @@ from numpy import sum as npsum
 DEBUGGING = True # For debugging: print processing time for each image.
 THRESHOLD = 50 # Cut-off for determining 'empty' pixels.
 CRITTER_SIZE = 2000 # Number of different pixels needed to save image.
+# THRESHOLD = 50 and CRITTER_SIZE = 2000 seems to remove flickering but catch actual changes.
 TEMPFILE1, TEMPFILE2 = 'image1.jpg', 'image2.jpg' # Filenames for image files.
-# 25000 registers trucks and busses from house window, but doesn't register cards or people.  Took about 400 photos in 8 hours.
+VIDEO_TIME = 10 # Time in seconds to record video.
 
 DELAY = 0 # Time in seconds between photos.  Doesn't include processing time.  Can be 0.
 
@@ -145,7 +128,9 @@ def main():
             # If a "critter" was found, save image and increment image number.
             diff = calculate_diffs(array1, array2)
             if count_pixels(diff) > CRITTER_SIZE:
-                filecopy(TEMPFILE2, img_path + 'critter{}.jpg'.format((str(n).zfill(4))))
+                camera.start_recording('critter{}.h264'.format((str(n).zfill(4))))
+                camera.wait_recording(VIDEO_TIME)
+                camera.stop_recording()
                 n += 1 
 
             # Transfer image2 to image1 to prepare for the next comparison:
