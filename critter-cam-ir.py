@@ -36,8 +36,8 @@ from numpy import sum as npsum
 # Global constants
 
 DEBUGGING = True # For debugging: print processing time for each image.
-THRESHOLD = 30 # Cut-off for determining 'empty' pixels.
-CRITTER_SIZE = 5000 # Number of different pixels needed to save image.
+THRESHOLD = 50 # Cut-off for determining 'empty' pixels.
+CRITTER_SIZE = 2000 # Number of different pixels needed to save image.
 TEMPFILE1, TEMPFILE2 = 'image1.jpg', 'image2.jpg' # Filenames for image files.
 # 25000 registers trucks and busses from house window, but doesn't register cards or people.  Took about 400 photos in 8 hours.
 
