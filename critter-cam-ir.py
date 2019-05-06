@@ -72,10 +72,10 @@ def count_pixels(rgb_diff):
     # .clip(min=0) converts negatives to 0
     flat_diffs = (flat_diffs - std_devs).clip(min=0)
 
-    # Summing flat_diffs along 'axis 2' (i.e., in its third dimension)
+    # Summing flat_diffs along 'axis 1' (i.e., in its second dimension)
     # sums the 3 rgb differences and creates a 1D array of
     # single values:
-    diffs = npsum(flat_diffs,axis=2)
+    diffs = npsum(flat_diffs,axis=1)
     
     # We want to count how many of these values are greater than THRESHOLD.
     # diffs//THRESHOLD returns 0 if diffs<THRESHOLD and a positive integer
