@@ -132,6 +132,7 @@ def main():
                 camera.wait_recording(VIDEO_TIME)
                 camera.stop_recording()
                 n += 1 
+                array2 = get_pic(TEMPFILE2)
 
             # Transfer image2 to image1 to prepare for the next comparison:
             rename(TEMPFILE2, TEMPFILE1)
