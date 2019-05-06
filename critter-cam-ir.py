@@ -21,7 +21,7 @@ otherwise it is discarded.
 The original comparison algorithm is in birds.py.  That algorithm did the
 subtraction 'by hand' and ran slowly (20 seconds to process); this version
 uses the math module 'numpy' to speed things up, though this makes the math
-a little more opaque.  This one processes in about 1 second.
+a little more opaque.  This one processes in about 1.4 seconds.
 """
 
 # Imports
