@@ -60,12 +60,13 @@ def count_pixels(rgb_diff):
     # Pixels only count as "changed" (non-zero difference) if they 
     # exceed this std deviation by the global THRESHOLD value.
 
-    # Reduce 2D array of RGB triples to a 1D list of triples: 
+    # Reduce 3D array to 2D n x 3 where each row is [R,G,B]
+    # (i.e. reduce to list of pixels insted of 2D matrix of pixels) 
     flat_diffs = reshape(rgb_diff, (-1,3))
     # Then find std deviations. Using 'axis=0' returns array of 3 values,
     # one for each color dimension.  We make these ints to reduce the calculation
     # in the next step. 
-    std_devs = int_(std(rgb_diff, axis=0))
+    std_devs = int_(std(flat_diffs, axis=0))
     # Now subtract each rgb minus its std dev. 
     # (Numpy subraction will subtract std_devs from each RGB triple).
     # .clip(min=0) converts negatives to 0
@@ -84,7 +85,7 @@ def count_pixels(rgb_diff):
 
     if DEBUGGING:
         print(count)
-        
+
     return count
 
 
