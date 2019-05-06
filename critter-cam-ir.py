@@ -35,7 +35,7 @@ from numpy import sum as npsum
 
 # Global constants
 
-CHECKING_TIME = True # For debugging: print processing time for each image.
+DEBUGGING = True # For debugging: print processing time for each image.
 THRESHOLD = 30 # Cut-off for determining 'empty' pixels.
 CRITTER_SIZE = 5000 # Number of different pixels needed to save image.
 TEMPFILE1, TEMPFILE2 = 'image1.jpg', 'image2.jpg' # Filenames for image files.
@@ -81,6 +81,10 @@ def count_pixels(rgb_diff):
     # if diffs>=THRESHOLD.  Therefore sign(diffs//THRESHOLD) returns 1 if
     # diffs>=THRESHOLD and 0 otherwise.  Add these up to get our count.
     count = npsum(sign(diffs//THRESHOLD))
+
+    if DEBUGGING:
+        print(count)
+        
     return count
 
 
@@ -130,7 +134,7 @@ def main():
         camera.capture(TEMPFILE1)
         array1 = get_pic(TEMPFILE1)
         while True:
-            if CHECKING_TIME:
+            if DEBUGGING:
                 start = time() # Used for measuring processing time.
 
             # Get second image for comparison:
@@ -147,7 +151,7 @@ def main():
             rename(TEMPFILE2, TEMPFILE1)
             array1 = array2
 
-            if CHECKING_TIME:
+            if DEBUGGING:
                 print(time()-start) # Print processing time.
 
             # Pause before taking next photo:
