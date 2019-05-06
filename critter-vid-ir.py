@@ -128,7 +128,7 @@ def main():
             # If a "critter" was found, save image and increment image number.
             diff = calculate_diffs(array1, array2)
             if count_pixels(diff) > CRITTER_SIZE:
-                camera.start_recording('critter{}.h264'.format((str(n).zfill(4))))
+                camera.start_recording( img_path + 'critter{}.h264'.format((str(n).zfill(4))))
                 camera.wait_recording(VIDEO_TIME)
                 camera.stop_recording()
                 n += 1 
